@@ -1,16 +1,23 @@
 # Uses python3
 import sys
 
-def gcd_naive(a, b):
-    current_gcd = 1
-    for d in range(2, min(a, b) + 1):
-        if a % d == 0 and b % d == 0:
-            if d > current_gcd:
-                current_gcd = d
 
-    return current_gcd
+def gcd(n1, n2):
+    if n2 == 0:
+        print(n1)
+        return
+
+    if n1 > n2:
+        r = n1 % n2
+        gcd(n2, r)
+    elif n1 < n2:
+        r = n2 % n1
+        gcd(n1, r)
+    else:
+        print(n1)
+
 
 if __name__ == "__main__":
     input = sys.stdin.read()
     a, b = map(int, input.split())
-    print(gcd_naive(a, b))
+    gcd(a, b)

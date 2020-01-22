@@ -1,9 +1,13 @@
 # Uses python3
-def calc_fib(n):
-    if (n <= 1):
-        return n
+def fib(n):
+    lis = [0, 1]
+    if n <= 1:
+        return lis[n]
+    else:
+        for i in range(1, n):
+            lis.append(lis[i - 1] + lis[i])
+        return lis[n]
 
-    return calc_fib(n - 1) + calc_fib(n - 2)
 
 n = int(input())
-print(calc_fib(n))
+print(fib(n))
