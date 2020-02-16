@@ -4,13 +4,37 @@ from collections import namedtuple
 
 Segment = namedtuple('Segment', 'start end')
 
+
 def optimal_points(segments):
-    points = []
-    #write your code here
-    for s in segments:
-        points.append(s.start)
-        points.append(s.end)
-    return points
+    min = float('inf')
+    dic = {}
+    lis = []
+    segment_length = len(segments)
+    for segment in segments:
+        for i in range(segment.start, segment.end + 1):
+            if i in dic.keys():
+                dic_len = len(dic[i])
+                if dic_len == 0:
+                    return i
+                if dic_len < min:
+                    min = dic_len
+                    min_key = i
+                if segments.index(segment) in dic[i]:
+                    dic[i].remove(segments.index(segment))
+
+            else:
+                dic[i] = list(range(len(segments)))
+                dic[i].remove(segments.index(segment))
+
+    lis.append(min_key)
+
+    for j in dic[min_key]:
+        lis.append(segments[j].end)
+
+    list(set(lis)).sort()
+
+    return list(set(lis))
+
 
 if __name__ == '__main__':
     input = sys.stdin.read()
