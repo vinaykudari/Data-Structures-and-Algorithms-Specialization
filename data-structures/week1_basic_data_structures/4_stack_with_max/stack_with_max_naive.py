@@ -1,26 +1,38 @@
 #python3
 import sys
 
-class StackWithMax():
-    def __init__(self):
-        self.__stack = []
 
-    def Push(self, a):
-        self.__stack.append(a)
+class Stack:
+    def __init__(self, size):
+        self.top = -1
+        self.arr = [None]*size
+        self.max = 0
 
-    def Pop(self):
-        assert(len(self.__stack))
-        self.__stack.pop()
+    def push(self, data):
+        if self.top == len(self.arr)-1:
+            return
+        else:
+            self.top = self.top + 1
+            self.arr[self.top] = data
+        if data > self.max:
+            self.max = data
+
+    def pop(self):
+        if self.top == -1:
+            return
+        else:
+            val = self.arr[self.top]
+            self.arr[self.top] = None
+            self.top = self.top - 1
+            return val
 
     def Max(self):
-        assert(len(self.__stack))
-        return max(self.__stack)
+        return self.max
 
 
 if __name__ == '__main__':
-    stack = StackWithMax()
-
     num_queries = int(sys.stdin.readline())
+    stack = Stack(num_queries)
     for _ in range(num_queries):
         query = sys.stdin.readline().split()
 
