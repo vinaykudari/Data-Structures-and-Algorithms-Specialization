@@ -1,24 +1,48 @@
 # python3
 
 
-def build_heap(data):
-    """Build a heap from ``data`` inplace.
+class MinHeap:
+    def __init__(self, size):
+        self.size = size
+        self.arr = []
+        self.swaps = []
 
-    Returns a sequence of swaps performed by the algorithm.
-    """
-    # The following naive implementation just sorts the given sequence
-    # using selection sort algorithm and saves the resulting sequence
-    # of swaps. This turns the given array into a heap, but in the worst
-    # case gives a quadratic number of swaps.
-    #
-    # TODO: replace by a more efficient implementation
-    swaps = []
-    for i in range(len(data)):
-        for j in range(i + 1, len(data)):
-            if data[i] > data[j]:
-                swaps.append((i, j))
-                data[i], data[j] = data[j], data[i]
-    return swaps
+    def parent(self, i):
+        return i - 1 // 2
+
+    def leftChild(self, i):
+        return i * 2 + 1
+
+    def rightChild(self, i):
+        return i * 2 + 2
+
+    def shiftDown(self, index):
+        minIndex = index
+        l = self.leftChild(index)
+        #         print(f'Left Child Index = {l}; Min Index = {minIndex}; Array = {self.arr}')
+        if l < self.size and self.arr[l] < self.arr[minIndex]:
+            minIndex = self.leftChild(minIndex)
+        r = self.rightChild(index)
+        if r < self.size and self.arr[r] < self.arr[minIndex]:
+            minIndex = self.rightChild(index)
+
+        if self.arr[minIndex] != self.arr[index]:
+            self.swaps.append((index, minIndex))
+            self.arr[minIndex], self.arr[index] = self.arr[index], self.arr[minIndex]
+            self.shiftDown(minIndex)
+
+    def getSwaps(self):
+        return self.swaps
+
+
+def build_heap(data):
+    mh = MinHeap(len(data))
+    mh.arr = data
+
+    for i in range(mh.size // 2, -1, -1):
+        mh.shiftDown(i)
+
+    return mh.swaps
 
 
 def main():
