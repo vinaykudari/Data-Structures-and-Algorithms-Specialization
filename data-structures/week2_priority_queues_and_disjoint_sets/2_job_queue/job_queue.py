@@ -1,15 +1,14 @@
 # python3
 
 from collections import namedtuple
-import heapq
 
-job = namedtuple('job', ['thread', 'finish_time'])
+item = namedtuple('item', ['val', 'priority'])
 
 
 class MinHeap:
-    def __init__(self, size):
+    def __init__(self):
         self.size = 0
-        self.arr = [None] * size
+        self.arr = []
 
     def parent(self, i):
         return (i - 1) // 2
@@ -22,20 +21,20 @@ class MinHeap:
 
     def shiftDown(self, index):
         minIndex = index
-        r = self.rightChild(index)
-        if r < self.size and self.arr[r] < self.arr[minIndex]:
-            minIndex = self.rightChild(index)
         l = self.leftChild(index)
-        if l < self.size and self.arr[l].finish_time < self.arr[minIndex].finish_time:
+        if l < self.size and self.arr[l].priority < self.arr[minIndex].priority:
             minIndex = self.leftChild(minIndex)
-
-        if self.arr[minIndex] != self.arr[index]:
+        r = self.rightChild(index)
+        if r < self.size and self.arr[r].priority < self.arr[minIndex].priority:
+            minIndex = self.rightChild(index)
+        #         print(f'minIndex = {minIndex}; index = {index}')
+        if minIndex != index:
             self.arr[minIndex], self.arr[index] = self.arr[index], self.arr[minIndex]
             self.shiftDown(minIndex)
 
     def shiftUp(self, index):
         #         print(f'index = {index}; self.parent(index) = {self.parent(index)}; arr = {self.arr}')
-        while self.parent(index) >= 0 and self.arr[self.parent(index)].finish_time > self.arr[index].finish_time:
+        while self.parent(index) >= 0 and self.arr[self.parent(index)].priority > self.arr[index].priority:
             self.arr[self.parent(index)], self.arr[index] = self.arr[index], self.arr[self.parent(index)]
             index = self.parent(index)
 
@@ -46,23 +45,20 @@ class MinHeap:
             self.shiftDown(i)
 
     def extractMin(self):
-        if self.size < 0:
+        if self.size <= 0:
             return
         minJob = self.arr[0]
         self.arr[0] = self.arr[self.size - 1]
         #         print(f'Array before ShiftDown : {self.arr}')
-        self.arr[self.size - 1] = None
+        self.arr.remove(self.arr[self.size - 1])
         self.size -= 1
         self.shiftDown(0)
         #         print(f'Array after ShiftDown : {self.arr}')
         return minJob
 
     def insert(self, data):
-        if self.size >= len(self.arr):
-            print("Heap is full")
-            return
         #         print(f'inserting data at {self.size}')
-        self.arr[self.size] = data
+        self.arr.append(data)
         self.shiftUp(self.size)
         self.size += 1
 
@@ -76,32 +72,42 @@ def assign_jobs(no_of_threads, job_times):
     start_times = []
     no_of_jobs = len(job_times)
     arr = []
-    jobs = []
     n = 0
 
-    for thread_index in range(no_of_threads):
-        arr.append(job(thread_index, job_times[thread_index]))
+    job_heap = MinHeap()
+    thread_heap = MinHeap()
+
+    for thread_index in range(min(no_of_threads, no_of_jobs)):
+        arr.append(item(thread_index, job_times[thread_index]))
         start_times.append((thread_index, 0))
 
-    mh = MinHeap(no_of_threads)
-    for item in arr:
-        mh.insert(item)
+    for job in arr:
+        job_heap.insert(job)
         n += 1
 
-    while n < no_of_jobs:
-        finishedJob = mh.extractMin()
-        start_times.append((finishedJob.thread, finishedJob.finish_time))
-        heapq.heappush(jobs, finishedJob)
-        while mh.size > 0 and mh.getMin().finish_time - finishedJob.finish_time == 0:
-            finishedJob = mh.extractMin()
-            heapq.heappush(jobs, finishedJob)
-        #         print(finishedJob)
+    # print(f'Job Heap = {job_heap.arr}')
 
-        while len(jobs) > 0:
-            j = heapq.heappop(jobs)
-            mh.insert(job(j.thread, j.finish_time + job_times[n]))
+    while n < no_of_jobs:
+        finishedJob = job_heap.extractMin()
+        #     print(f'Extracting Job with min finish time from Job Heap : {finishedJob}')
+        # start_times.append((finishedJob.val, finishedJob.priority))
+        #     print(f'Inserting into thread heap; Thread Heap = {thread_heap.arr}')
+        thread_heap.insert(item(finishedJob.priority, finishedJob.val))
+        while job_heap.size > 0 and job_heap.getMin().priority - finishedJob.priority == 0:
+            finishedJob = job_heap.extractMin()
+            #         print(f'Extracting Job with min finish time from Job Heap : {finishedJob}')
+            thread_heap.insert(item(finishedJob.priority, finishedJob.val))
+            # start_times.append((finishedJob.val, finishedJob.priority))
+
+        #     print(f'\nN = {n}; Thread Heap = {thread_heap.arr}; Thread Heap Size = {thread_heap.size}; Job Heap = {job_heap.arr} \n')
+
+        while thread_heap.size > 0:
+            j = thread_heap.extractMin()
+            start_times.append((j.priority, j.val))
+            job_heap.insert(item(j.priority, j.val + job_times[n]))
+            #         print(f'Extracting thread with min index from Thread Heap : {j} amd inserting to Job Heap {job_heap.arr}')
             n = n + 1
-    #         print(f'N = {n}')
+    #         print(f'N = {n}; Thread Heap = {thread_heap.arr};\n')
 
     return start_times
 

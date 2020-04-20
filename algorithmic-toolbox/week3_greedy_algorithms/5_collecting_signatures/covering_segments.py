@@ -6,34 +6,17 @@ Segment = namedtuple('Segment', 'start end')
 
 
 def optimal_points(segments):
-    min = float('inf')
-    dic = {}
-    lis = []
-    segment_length = len(segments)
-    for segment in segments:
-        for i in range(segment.start, segment.end + 1):
-            if i in dic.keys():
-                dic_len = len(dic[i])
-                if dic_len == 0:
-                    return i
-                if dic_len < min:
-                    min = dic_len
-                    min_key = i
-                if segments.index(segment) in dic[i]:
-                    dic[i].remove(segments.index(segment))
+    segments.sort(key=lambda x: x[1], reverse=True)
+    min_points = []
+    for i in range(len(segments)):
+        if not min_points:
+            min_points.append(segments[i].start)
+        elif segments[i].start > min_points[-1]:
+            min_points[-1] = segments[i].start
+        elif segments[i].end < min_points[-1]:
+            min_points.append(segments[i].start)
 
-            else:
-                dic[i] = list(range(len(segments)))
-                dic[i].remove(segments.index(segment))
-
-    lis.append(min_key)
-
-    for j in dic[min_key]:
-        lis.append(segments[j].end)
-
-    list(set(lis)).sort()
-
-    return list(set(lis))
+    return min_points
 
 
 if __name__ == '__main__':

@@ -2,9 +2,20 @@
 
 import sys
 
+
 def lcs2(a, b):
-    #write your code here
-    return min(len(a), len(b))
+    lenA = len(a);
+    lenB = len(b)
+    grid = [[0 for j in range(lenB + 1)] for i in range(lenA + 1)]
+    for i in range(1, lenA + 1):
+        for j in range(1, lenB + 1):
+            if a[i - 1] == b[j - 1]:
+                grid[i][j] = grid[i - 1][j - 1] + 1
+            else:
+                grid[i][j] = max(grid[i - 1][j], grid[i][j - 1])
+
+    return grid[-1][-1]
+
 
 if __name__ == '__main__':
     input = sys.stdin.read()
